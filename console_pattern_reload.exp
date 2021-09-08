@@ -1,0 +1,70 @@
+#!/usr/bin/expect
+
+set timeout 300
+set prompt  "*login:"
+set command "pci"
+set MAX_LOOP 300
+set count $MAX_LOOP
+set USR admin
+set TARGET 10.28.6.200
+set PSS YourPaSsWoRd
+set PWR_CMD "power outlets 12 cycle /y"
+
+spawn telnet 10.5.208.248 2015
+send "\r"
+sleep 1
+send "\r"
+send "\r"
+while {$count > 0 } {
+set timeout 300
+
+expect {
+ "*failed to come online*" {
+       puts "!!!!! FAILED !!!!!"
+       break
+  }
+
+  "$prompt" {
+    send "$USR\r"
+    expect "Password:"
+    send "$PSS\r"
+  }
+}
+#send "\r"
+#set pci_out "$expect_out(1,string)"
+#puts "*******************************"
+#puts "$expect_out(buffer)"
+#set pci_out "$expect_out(buffer)"
+
+
+set timeout 3
+expect "~$"
+#send "sleep 15\r"
+send "sleep 2\r"
+puts "*******************************\r"
+#send "ls -l /usr/sbin/\r"
+#send "sha256sum /host/image-202012.0-dirty-20210525.145018/fs.squashfs\r"
+expect {
+
+ "*SQUASHFS error*" {
+       puts "!!!!! FAILED !!!!!"
+       break
+  }
+
+
+ "*" {
+       puts "***** NO ERROR SUCCESS ...."
+       send "sudo reboot\r"
+        #send "sudo /usr/share/sonic/device/armhf-nokia_ixs7215_52x-r0/platform_reboot\r"
+       send "\r"
+       set count1 [expr $MAX_LOOP-$count];
+       puts "REBOOTING $count1\r\n"
+  }
+
+}
+set count [expr $count-1];
+puts "\rLoop : $count\r"
+}
+puts "*******************************"
+#interact return
+#EOF
